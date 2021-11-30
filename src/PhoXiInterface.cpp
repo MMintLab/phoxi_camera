@@ -269,6 +269,8 @@ namespace phoxi_camera {
     }
 
     pho::api::PhoXiCoordinateSpace PhoXiInterface::getCoordinateSpace() {
+        scanner->CoordinatesSettings->CoordinateSpace;
+        std::cout << "coordinatespace" << scanner->CoordinatesSettings->CoordinateSpace;
         this->isOk();
         return scanner->CoordinatesSettings->CoordinateSpace;
     }

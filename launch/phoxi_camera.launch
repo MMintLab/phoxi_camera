@@ -2,4 +2,8 @@
     <node pkg="phoxi_camera" type="phoxi_camera" name="phoxi_camera" output="screen">
         <rosparam file="$(find phoxi_camera)/config/phoxi_camera.yaml" command="load"/>
     </node>
+
+    <include file="$(find phoxi_camera)/launch/load_urdf.launch"/>
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find phoxi_camera)/rviz/urdf.rviz"/>
 </launch>

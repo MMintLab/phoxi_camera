@@ -1,14 +1,17 @@
 //
-// Created by controller on 1/11/18.
+// Created by controller on 1/11/18. + selectively updated with https://github.com/carlosmccosta/phoxi_camera/commit/6738ce712f09ab6c1f287d290722bf18ccb666bb#
 //
 
 #include "phoxi_camera/RosInterface.h"
-
+void getSimpleMatrix(const pho::api::FrameInfo info, double result[16]);
 namespace phoxi_camera {
-    RosInterface::RosInterface() : nh("~"), dynamicReconfigureServer(dynamicReconfigureMutex, nh),
+    RosInterface::RosInterface() : nh("~"), mono8ImageTransport(nh),mono8CameraInfoManager(nh), dynamicReconfigureServer(dynamicReconfigureMutex, nh),
                                    PhoXi3DscannerDiagnosticTask("PhoXi3Dscanner",
                                                                 boost::bind(&RosInterface::diagnosticCallback, this,
-                                                                            _1)) {
+                                                                            _1)) {                                                             
+        std::string scannerId;                                                   
+        nh.param<std::string>("scanner_id", scannerId, "");
+        nh.param<std::string>("frame_id", frameId, "PhoXi3Dscanner_sensor");
 
         //create service servers
         getDeviceListService = nh.advertiseService("get_device_list", &RosInterface::getDeviceList, this);
@@ -30,8 +33,12 @@ namespace phoxi_camera {
         getApiVersionService = nh.advertiseService("get_api_version", &RosInterface::getApiVersion, this);
         getFirmwareVersionService = nh.advertiseService("get_firmware_version", &RosInterface::getFirmwareVersion, this);
 #ifndef PHOXI_API_v1_1
-        setCoordianteSpaceService = nh.advertiseService("V2/set_transformation",&RosInterface::setTransformation, this);
-        setTransformationService = nh.advertiseService("V2/set_coordinate_space",&RosInterface::setCoordianteSpace, this);
+        // setCoordianteSpaceService = nh.advertiseService("V2/set_transformation",&RosInterface::setTransformation, this);
+        // setTransformationService = nh.advertiseService("V2/set_coordinate_space",&RosInterface::setCoordianteSpace, this);
+        setCoordianteSpaceService = nh.advertiseService("V2/set_coordinate_space",&RosInterface::setCoordianteSpace, this);
+        setTransformationService = nh.advertiseService("V2/set_transformation",&RosInterface::setTransformation, this);
+        
+        
         saveLastFrameService = nh.advertiseService("V2/save_last_frame", &RosInterface::saveLastFrame, this);
 #endif
 
@@ -46,6 +53,41 @@ namespace phoxi_camera {
         rawTexturePub = nh.advertise<sensor_msgs::Image>("texture", topic_queue_size, latch_topics);
         rgbTexturePub = nh.advertise<sensor_msgs::Image>("rgb_texture", topic_queue_size, latch_topics);
         depthMapPub = nh.advertise<sensor_msgs::Image>("depth_map", topic_queue_size, latch_topics);
+        // opticalFramePub = nh.advertise<sensor_msgs::Image>("optical_frame", topic_queue_size, latch_topics);
+
+
+
+
+
+        // Publish camera info
+        std::string camera_info_url;
+        nh.param<std::string>("camera_info_url", camera_info_url, "package://phoxi_camera/config/camera_info.yaml");
+        if (camera_info_url.empty())
+        {
+            ROS_WARN("Missing camera_info_url.");
+        }
+        else
+        {   ROS_INFO("scanner id %s", scannerId.c_str());
+            mono8CameraInfoManager.setCameraName(scannerId);
+            if (mono8CameraInfoManager.validateURL(camera_info_url) && mono8CameraInfoManager.loadCameraInfo(camera_info_url))
+            {
+                ROS_INFO("Loaded camera calibration from %s", camera_info_url.c_str());
+            }
+            else
+            {
+                ROS_INFO("Failed to load camera calibration from %s", camera_info_url.c_str());
+            }
+        }
+
+        std::string image_base_topic;
+        nh.param<std::string>("image_base_topic", image_base_topic, "image_raw");
+        int image_queue_size;
+        nh.param<int>("image_queue_size", image_queue_size, 3);
+        bool image_latched_publisher;
+        nh.param<bool>("image_latched_publisher", image_latched_publisher, false);
+        mono8CameraPublisher = mono8ImageTransport.advertiseCamera(image_base_topic, image_queue_size, image_latched_publisher);
+
+
 
         //set diagnostic Hw id
         diagnosticUpdater.setHardwareID("none");
@@ -53,10 +95,7 @@ namespace phoxi_camera {
         diagnosticTimer = nh.createTimer(ros::Duration(5.0), &RosInterface::diagnosticTimerCallback, this);
         diagnosticTimer.start();
 
-        nh.param<std::string>("frame_id", frameId, "PhoXi3Dscanner_sensor");
-
         //connect to default scanner
-        std::string scannerId;
         if (nh.param<std::string>("scanner_id", scannerId, "") && !scannerId.empty()) {
             try {
                 RosInterface::connectCamera(scannerId);
@@ -208,6 +247,10 @@ namespace phoxi_camera {
     }
 
     bool RosInterface::saveFrame(phoxi_camera::SaveFrame::Request& req, phoxi_camera::SaveFrame::Response& res) {
+
+        const pho::api::PhoXiCoordinatesSettings CoordinatesSettings;
+        // std::cout << "coordinate space " << std::string(CoordinatesSettings.CoordinateSpace) ;
+
         try {
             pho::api::PFrame frame = RosInterface::getPFrame(req.in);
             if (!frame) {
@@ -356,10 +399,21 @@ namespace phoxi_camera {
             cv::normalize(cvGreyTexture, cvGreyTexture, 0, 255, CV_MINMAX);
             cvGreyTexture.convertTo(cvGreyTexture, CV_8U);
             cv::equalizeHist(cvGreyTexture, cvGreyTexture);
-            cv::Mat cvRgbTexture;
-            cv::cvtColor(cvGreyTexture, cvRgbTexture, CV_GRAY2RGB);
-            cv_bridge::CvImage rgbTexture(header, sensor_msgs::image_encodings::RGB8, cvRgbTexture);
-            rgbTexturePub.publish(rgbTexture.toImageMsg());
+            /// "original code" 
+            // cv::Mat cvRgbTexture;
+            // cv::cvtColor(cvGreyTexture, cvRgbTexture, CV_GRAY2RGB);
+            // cv_bridge::CvImage rgbTexture(header, sensor_msgs::image_encodings::RGB8, cvRgbTexture);
+            // rgbTexturePub.publish(rgbTexture.toImageMsg());
+            
+            /// Publish texture with camera_info
+            cv_bridge::CvImage mono8Texture(header, sensor_msgs::image_encodings::MONO8, cvGreyTexture);
+            sensor_msgs::ImagePtr mono8_image_msg = mono8Texture.toImageMsg();
+            sensor_msgs::CameraInfo camera_info = mono8CameraInfoManager.getCameraInfo();
+            camera_info.header = mono8_image_msg->header;
+            mono8CameraPublisher.publish(*mono8_image_msg, camera_info);
+
+
+
         }
         if (frame->ConfidenceMap.Empty()) {
             ROS_WARN("Empty confidence map!");
@@ -735,6 +789,31 @@ namespace phoxi_camera {
         config.__fromServer__(nh);
     }
 }
+
+void getSimpleMatrix(const pho::api::FrameInfo info, double result[16])
+    {
+        result[0] = info.SensorXAxis.x;
+        result[1] = info.SensorYAxis.x;
+        result[2] = info.SensorZAxis.x;
+        result[3] = info.SensorPosition.x;
+
+        result[4] = info.SensorXAxis.y;
+        result[5] = info.SensorYAxis.y;
+        result[6] = info.SensorZAxis.y;
+        result[7] = info.SensorPosition.y;
+
+        result[8] = info.SensorXAxis.z;
+        result[9] = info.SensorYAxis.z;
+        result[10] = info.SensorZAxis.z;
+        result[11] = info.SensorPosition.z;
+
+        result[12] = 0;
+        result[13] = 0;
+        result[14] = 0;
+        result[15] = 1;
+        std::cout << info.SensorXAxis.x << info.SensorYAxis.y << info.SensorZAxis.z ;
+    }
+
 
 
 

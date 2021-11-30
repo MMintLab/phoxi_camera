@@ -14,6 +14,8 @@
 #include <eigen_conversions/eigen_msg.h>
 #include <pcl/point_types.h>
 #include <pcl_ros/point_cloud.h>
+#include <camera_info_manager/camera_info_manager.h>
+#include <image_transport/image_transport.h>
 
 //dynamic reconfigure
 #include <dynamic_reconfigure/server.h>
@@ -166,6 +168,12 @@ namespace phoxi_camera {
         ros::Publisher rawTexturePub;
         ros::Publisher rgbTexturePub;
         ros::Publisher depthMapPub;
+        
+        // camera info
+        image_transport::ImageTransport mono8ImageTransport;
+        image_transport::CameraPublisher mono8CameraPublisher;
+        camera_info_manager::CameraInfoManager mono8CameraInfoManager;
+        
 
         //dynamic reconfigure
         boost::recursive_mutex dynamicReconfigureMutex;

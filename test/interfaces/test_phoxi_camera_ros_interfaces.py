@@ -198,16 +198,15 @@ class Test_phoxi_camera_ros_interface(TestCase):
         # create subscribers
         rospy.Subscriber(topic.point_cloud, sensor_msgs.msg.PointCloud2, callback)
         rospy.Subscriber(topic.normal_map, sensor_msgs.msg.Image, callback)
-        rospy.Subscriber(topic.confidence_map, sensor_msgs.msg.Image, callback)
+        # rospy.Subscriber(topic.confidence_map, sensor_msgs.msg.Image, callback)
         rospy.Subscriber(topic.texture, sensor_msgs.msg.Image, callback)
-
         srv_getFrame = rospy.ServiceProxy(service.get_frame, phoxi_camera_srv.GetFrame)
         res = srv_getFrame(-1)
         time.sleep(5)
 
         assert True == res.success
         assert "Ok" == res.message
-        assert published_topics_num == 4, "Some topic was not published after get_frame service"
+        assert published_topics_num == 3, "Some topic was not published after get_frame service"
         # disconnected
         disconnect()
         res = srv_getFrame(-1)

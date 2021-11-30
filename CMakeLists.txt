@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 2.8.12)
 project(phoxi_camera)
-
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(PhoXi REQUIRED CONFIG PATHS "$ENV{PHOXI_CONTROL_PATH}")
 find_package(Eigen3 REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system)
@@ -18,6 +19,8 @@ find_package(catkin REQUIRED
     eigen_conversions
     cv_bridge
     message_generation
+    camera_info_manager
+    image_transport
 )
 
 catkin_python_setup()
