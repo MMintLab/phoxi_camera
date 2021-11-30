@@ -1,7 +1,14 @@
 cmake_minimum_required(VERSION 2.8.12)
 project(phoxi_camera)
+<<<<<<< HEAD
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+=======
+
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+>>>>>>> c913c42b0fe8daa6fc0ad8887b53ef1a003d7992
 find_package(PhoXi REQUIRED CONFIG PATHS "$ENV{PHOXI_CONTROL_PATH}")
 find_package(Eigen3 REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system)
