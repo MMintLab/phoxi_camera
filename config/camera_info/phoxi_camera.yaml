@@ -1,0 +1,21 @@
+image_width: 2064
+image_height: 1544
+camera_name: "JHE-129"
+camera_matrix:
+  rows: 3
+  cols: 3
+  data: [ 2339.51, 0, 1061.25, 0, 2339.27, 772.595, 0, 0, 1 ]
+
+distortion_model: "plumb_bob"
+distortion_coefficients:
+  rows: 1
+  cols: 5
+  data: [ -0.24226, 0.177497, 0.000629912, -0.000584663, -0.0795869 ]
+rectification_matrix:
+  rows: 3
+  cols: 3
+  data: [ 1, 0, 0, 0, 1, 0, 0, 0, 1 ]
+projection_matrix:
+  rows: 3
+  cols: 4
+  data: [ 2339.51, 0, 1061.25, 0.0, 0, 2339.27, 772.595, 0.0, 0.0, 0.0, 1.0, 0.0 ]

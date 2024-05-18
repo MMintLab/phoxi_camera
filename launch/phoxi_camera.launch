@@ -2,4 +2,6 @@
     <node pkg="phoxi_camera" type="phoxi_camera" name="phoxi_camera" output="screen">
         <rosparam file="$(find phoxi_camera)/config/phoxi_camera.yaml" command="load"/>
     </node>
+
+    <node pkg="phoxi_camera" type="pub_camera_info.py" name="pub_camera_info" output="screen"/>
 </launch>
