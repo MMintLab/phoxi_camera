@@ -137,7 +137,7 @@ add_dependencies(
 
 target_link_libraries(
   ${PROJECT_NAME}_PhoXi_Interface
-  ${PHOXI_LIBRARY}
+  ${PHOXI_LIB_DEBUG}
   rt
   pthread
 )
