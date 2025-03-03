@@ -4,4 +4,5 @@
     </node>
 
     <node pkg="phoxi_camera" type="pub_camera_info.py" name="pub_camera_info" output="screen"/>
+
 </launch>

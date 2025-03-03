@@ -4,6 +4,7 @@ from camera_info_manager import CameraInfoManager
 from rospy import Publisher
 from sensor_msgs.msg import CameraInfo
 
+
 if __name__ == '__main__':
     rospy.init_node("pub_camera_info")
 

@@ -21,6 +21,8 @@ find_package(catkin REQUIRED
     eigen_conversions
     cv_bridge
     message_generation
+    camera_info_manager
+    image_transport
 )
 
 catkin_python_setup()
@@ -135,7 +137,7 @@ add_dependencies(
 
 target_link_libraries(
   ${PROJECT_NAME}_PhoXi_Interface
-  ${PHOXI_LIBRARY}
+  ${PHOXI_LIB_DEBUG}
   rt
   pthread
 )

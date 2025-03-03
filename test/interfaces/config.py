@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 
 # camera ID for example "InstalledExamples-PhoXi-example" for file camera, "1711002" for real scanner
-camera_id = "InstalledExamples-basic-example"
-
+camera_id = "JHE-129"#"InstalledExamples-basic-example"
 node_name = "/phoxi_camera"
 
 srv_timeout = 1
