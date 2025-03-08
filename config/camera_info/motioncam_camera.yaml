@@ -1,0 +1,21 @@
+image_width: 1680
+image_height: 1200
+camera_name: "DHV-146"
+camera_matrix:
+  rows: 3
+  cols: 3
+  data: [1731.74, 0, 837.912, 0, 1731.64, 591.679, 0, 0, 1 ]
+
+distortion_model: "plumb_bob"
+distortion_coefficients:
+  rows: 1
+  cols: 5
+  data: [ -0.0890237, 0.131595, 0.000351434, 0.00131794, -0.00590336]
+rectification_matrix:
+  rows: 3
+  cols: 3
+  data: [ 1, 0, 0, 0, 1, 0, 0, 0, 1 ]
+projection_matrix:
+  rows: 3
+  cols: 4
+  data: [1731.74, 0, 837.912, 0, 0, 1731.64, 591.679, 0.0, 0.0, 0.0, 1.0, 0.0 ]
